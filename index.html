@@ -264,7 +264,7 @@
       }
     }
 
-    function waitForPlayerThenPlay() {
+ function waitForPlayerThenPlay() {
       if (!playerReady || !player.loadVideoById) {
         setTimeout(waitForPlayerThenPlay, 300);
         return;
@@ -272,51 +272,46 @@
       playCurrent();
     }
 
-function togglePlayPause() {
-  if (!player) return;
-  const state = player.getPlayerState();
-  const bars = document.getElementById('musicBars');
+    function playCurrent() {
+      if (!playerReady || !queue[currentIndex]) return;
+      player.loadVideoById(queue[currentIndex].videoId);
+      isPlaying = true;
+      updateQueueDisplay();
+      updatePlayPauseButton();
+    }
 
-  if (state === YT.PlayerState.PLAYING) {
-    player.pauseVideo();
-    isPlaying = false;
-    bars.style.visibility = "hidden";
-  } else {
-    player.playVideo();
-    isPlaying = true;
-    bars.style.visibility = "visible";
-  }
+    function nextTrack() {
+      if (currentIndex < queue.length - 1) {
+        currentIndex++;
+        playCurrent();
+      }
+    }
 
-  updatePlayPauseButton();
-}
-function playCurrent() {
-  if (!playerReady || !queue[currentIndex]) return;
-  player.loadVideoById(queue[currentIndex].videoId);
-  isPlaying = true;
-  updateQueueDisplay();
-  updatePlayPauseButton();
-  
-  const bars = document.getElementById('musicBars');
-  bars.style.visibility = "visible";
-}
-function onPlayerStateChange(event) {
-  const bars = document.getElementById("musicBars");
+    function prevTrack() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        playCurrent();
+      }
+    }
 
-  if (event.data === YT.PlayerState.ENDED) {
-    bars.style.visibility = "hidden";
-    nextTrack(); // auto play next
-  }
+    function togglePlayPause() {
+      if (!player) return;
+      const state = player.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        player.pauseVideo();
+        isPlaying = false;
+      } else {
+        player.playVideo();
+        isPlaying = true;
+      }
+      updatePlayPauseButton();
+    }
 
-  if (event.data === YT.PlayerState.PAUSED) {
-    bars.style.visibility = "hidden";
-  }
+    function updatePlayPauseButton() {
+      const btn = document.getElementById('playPauseBtn');
+      btn.textContent = isPlaying ? '⏸️' : '▶️';
+    }
 
-  if (event.data === YT.PlayerState.PLAYING) {
-    bars.style.visibility = "visible";
-  }
-}
-
-    
     function setVolume(val) {
       if (player && player.setVolume) {
         player.setVolume(val);
