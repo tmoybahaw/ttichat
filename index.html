@@ -1,0 +1,447 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YouTube Music Queue Player</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .player-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .player-controls button {
+      background: #1e1e1e;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      color: #eee;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .player-controls button:hover {
+      background: #333;
+    }
+    input[type="range"] {
+      width: 100px;
+    }
+    #results div:hover {
+      background: #333;
+    }
+  </style>
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DT76H08LWQ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DT76H08LWQ');
+</script>
+</head>
+<body>
+ 
+  <h5>YouTube Music Queue Player</h5>
+
+  <input type="text" id="yt-search" placeholder="Search YouTube Music..." style="width: 60%; padding: 10px; border-radius: 5px;" />
+  <button onclick="searchYouTube()" style="padding: 10px 15px; background: #00aaff; color: white; border: none; border-radius: 5px;">Search</button>
+
+  <div id="results" style="max-width: 600px; margin: 20px auto;"></div>
+
+  <style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #121212;
+    color: #f0f0f0;
+    padding: 2rem;
+    max-width: 500px;
+    margin: auto;
+  }
+
+  .player-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1e1e1e;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    margin-bottom: 1rem;
+  }
+
+  .player-controls button {
+    background: #2a2a2a;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .player-controls button:hover {
+    background: #3a3a3a;
+  }
+
+  #volumeControl {
+    width: 100px;
+    accent-color: #1db954;
+  }
+
+  h3 {
+    margin-bottom: 0.5rem;
+    color: #ccc;
+  }
+
+  #queue {
+    list-style: none;
+    padding: 0;
+    background: #1e1e1e;
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  #queue li {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #2c2c2c;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  #queue li:last-child {
+    border-bottom: none;
+  }
+
+  #queue li:hover {
+    background: #2a2a2a;
+  }
+
+  #queue li.active {
+    background: #1db954;
+    color: #000;
+    font-weight: bold;
+  }
+
+  #youtube-player {
+    width: 0;
+    height: 0;
+  }
+
+.music-bars {
+  display: flex;
+  gap: 4px;
+  height: 24px;
+  margin: 0 10px;
+  align-items: end;
+}
+
+.music-bars .bar {
+  width: 4px;
+  height: 100%;
+  background: #1db954;
+  animation: bounce 1s infinite ease-in-out;
+  transform-origin: bottom;
+}
+
+.music-bars .bar:nth-child(1) { animation-delay: 0s; }
+.music-bars .bar:nth-child(2) { animation-delay: 0.2s; }
+.music-bars .bar:nth-child(3) { animation-delay: 0.4s; }
+.music-bars .bar:nth-child(4) { animation-delay: 0.2s; }
+.music-bars .bar:nth-child(5) { animation-delay: 0s; }
+
+@keyframes bounce {
+  0%, 100% { height: 20%; }
+  50% { height: 100%; }
+}
+
+#musicBars {
+  visibility: hidden; /* Hide initially */
+}
+
+    
+</style>
+
+<div class="player-controls">
+  <button onclick="prevTrack()">⏮️</button>
+  <button onclick="togglePlayPause()" id="playPauseBtn">▶️</button>
+  <button onclick="nextTrack()">⏭️</button>
+  <input type="range" id="volumeControl" min="0" max="100" value="50">
+</div>
+
+
+<h3>🎵 Music Queue</h3>
+<ul id="queue"></ul>
+
+<div id="youtube-player"></div>
+<div class="music-bars" id="musicBars" style="visibility: hidden;">
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+</div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player;
+    let playerReady = false;
+    let queue = [];
+    let currentIndex = -1;
+    let isPlaying = false;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('youtube-player', {
+        height: '0',
+        width: '0',
+        videoId: '',
+        events: {
+          onReady: () => {
+            playerReady = true;
+            setVolume(50);
+          },
+          onStateChange: (event) => {
+            if (event.data === YT.PlayerState.ENDED) nextTrack();
+          }
+        }
+      });
+    }
+
+    function searchYouTube() {
+      const query = document.getElementById('yt-search').value;
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = 'Searching...';
+
+      fetch(`/api/youtube?query=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+          resultsDiv.innerHTML = '';
+          data.items.forEach(item => {
+            const videoId = item.id.videoId;
+            const title = item.snippet.title;
+            const thumbnail = item.snippet.thumbnails.default.url;
+
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.marginBottom = '10px';
+            div.style.cursor = 'pointer';
+            div.style.background = '#222';
+            div.style.borderRadius = '5px';
+            div.style.padding = '10px';
+
+            div.innerHTML = `
+              <img src="${thumbnail}" alt="${title}" style="margin-right: 10px; border-radius: 4px;">
+              <div>${title}</div>
+            `;
+
+            div.onclick = () => addToQueue({ title, videoId });
+            resultsDiv.appendChild(div);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          resultsDiv.innerHTML = 'Error fetching results.';
+        });
+    }
+
+    function addToQueue(song) {
+      queue.push(song);
+      updateQueueDisplay();
+      if (!isPlaying) {
+        currentIndex = queue.length - 1;
+        waitForPlayerThenPlay();
+      }
+    }
+
+    function waitForPlayerThenPlay() {
+      if (!playerReady || !player.loadVideoById) {
+        setTimeout(waitForPlayerThenPlay, 300);
+        return;
+      }
+      playCurrent();
+    }
+
+function togglePlayPause() {
+  if (!player) return;
+  const state = player.getPlayerState();
+  const bars = document.getElementById('musicBars');
+
+  if (state === YT.PlayerState.PLAYING) {
+    player.pauseVideo();
+    isPlaying = false;
+    bars.style.visibility = "hidden";
+  } else {
+    player.playVideo();
+    isPlaying = true;
+    bars.style.visibility = "visible";
+  }
+
+  updatePlayPauseButton();
+}
+function playCurrent() {
+  if (!playerReady || !queue[currentIndex]) return;
+  player.loadVideoById(queue[currentIndex].videoId);
+  isPlaying = true;
+  updateQueueDisplay();
+  updatePlayPauseButton();
+  
+  const bars = document.getElementById('musicBars');
+  bars.style.visibility = "visible";
+}
+function onPlayerStateChange(event) {
+  const bars = document.getElementById("musicBars");
+
+  if (event.data === YT.PlayerState.ENDED) {
+    bars.style.visibility = "hidden";
+    nextTrack(); // auto play next
+  }
+
+  if (event.data === YT.PlayerState.PAUSED) {
+    bars.style.visibility = "hidden";
+  }
+
+  if (event.data === YT.PlayerState.PLAYING) {
+    bars.style.visibility = "visible";
+  }
+}
+
+    
+    function setVolume(val) {
+      if (player && player.setVolume) {
+        player.setVolume(val);
+      }
+    }
+
+    document.getElementById('volumeControl').addEventListener('input', function () {
+      setVolume(this.value);
+    });
+
+    function updateQueueDisplay() {
+      const queueList = document.getElementById('queue');
+      queueList.innerHTML = '';
+      queue.forEach((song, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${i === currentIndex ? '▶️ ' : ''}${song.title}`;
+        li.style.marginBottom = '5px';
+        queueList.appendChild(li);
+      });
+    }
+  </script>
+  <script>
+  function acceptConsent() {
+    localStorage.setItem("consentAccepted", "yes");
+    document.getElementById("consentModalBackdrop").style.display = "none";
+  }
+
+  // Show the modal only if user hasn't accepted yet
+  window.addEventListener("load", () => {
+    if (localStorage.getItem("consentAccepted") !== "yes") {
+      document.getElementById("consentModalBackdrop").style.display = "flex";
+    } else {
+      document.getElementById("consentModalBackdrop").style.display = "none";
+    }
+  });
+</script>
+//CHAT//
+ <div id="ttiChatDrawerBtn" title="Open Music Player">PUBLIC CHAT</div>
+
+    <div id="ttiChatDrawer">
+      <div id="ttiChatHeader">
+        <span>CHATROOM</span>
+        <button onclick="closettiChatDrawer()">✖</button>
+      </div>
+      <iframe 
+        src="chat.html" 
+        frameborder="0"
+        allow="autoplay; encrypted-media; fullscreen; accelerometer; gyroscope; clipboard-write; web-share"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <style>
+      #ttiChatDrawerBtn {
+        position: fixed;
+        bottom: 90px;
+        right: 25px;
+        background-color: #00aaff;
+        color: white;
+        font-size: 26px;
+        padding: 14px;
+        border-radius: 50%;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        cursor: pointer;
+        z-index: 9998;
+        transition: background-color 0.3s, transform 0.2s;
+      }
+      #ttiChatDrawerBtn:hover {
+        background-color: #0077cc;
+        transform: scale(1.1);
+      }
+      #ttiChatDrawer {
+        position: fixed;
+        right: -100%;
+        top: 0;
+        width: 400px;
+        max-width: 100%;
+        height: 100%;
+        background: #111;
+        color: white;
+        box-shadow: -4px 0 12px rgba(0,0,0,0.5);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        transition: right 0.3s ease-in-out;
+      }
+      #ttiChatDrawer.open {
+        right: 0;
+      }
+      #ttiChatDrawer iframe {
+        flex: 1;
+        width: 100%;
+        border: none;
+      }
+      #ttiChatHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background-color: #222;
+        font-size: 18px;
+        border-bottom: 1px solid #333;
+      }
+      #ttiChatHeader button {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+      }
+      @media (max-width: 500px) {
+        #ttiChatDrawer {
+          width: 100%;
+        }
+      }
+    </style>
+
+    <script>
+      const ttiChatDrawer = document.getElementById('ttiChatDrawer');
+      document.getElementById('ttiChatDrawerBtn').onclick = function () {
+        ttiChatDrawer.classList.add('open');
+      };
+      function closettiChatDrawer() {
+        ttiChatDrawer.classList.remove('open');
+      }
+    </script>
+ </body>
+</html>
