@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +6,35 @@
   <title>YouTube Music Queue Player</title>
   <style>
     body {
+      margin: 0;
+      padding: 0;
+      background-image: url('https://wallpapercave.com/wp/wp3162607.gif');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      padding: 15px 30px;
+      background-color: rgba(0, 0, 0, 0.6); /* Transparent black */
+      border-bottom: 1px solid #444;
+    }
+
+    .logo {
+      height: 50px;
+      margin-right: 15px;
+    }
+
+    .site-title {
+      font-size: 24px;
+      font-weight: bold;
+    }
+   
+  body {
       background-color: #121212;
       color: #eee;
       font-family: Arial, sans-serif;
@@ -40,9 +68,13 @@
   </style>
 
 </head>
+  </head>
 <body>
- 
-  <h5>YouTube Music Queue Player</h5>
+
+  <header>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/75/YouTube_Music_icon.svg" alt="Logo" class="logo" />
+    <div class="site-title">YouTube Music Queue Player</div>
+  </header>
 
   <input type="text" id="yt-search" placeholder="Search YouTube Music..." style="width: 60%; padding: 10px; border-radius: 5px;" />
   <button onclick="searchYouTube()" style="padding: 10px 15px; background: #00aaff; color: white; border: none; border-radius: 5px;">Search</button>
