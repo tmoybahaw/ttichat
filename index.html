@@ -2,25 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YouTube Music Queue Player</title>
   <style>
     body {
       margin: 0;
-      padding: 0;
+      padding: 20px;
       background-image: url('https://wallpapercave.com/wp/wp3162607.gif');
       background-size: cover;
       background-repeat: no-repeat;
       background-attachment: fixed;
       font-family: Arial, sans-serif;
-      color: white;
+      color: #eee;
+      background-color: #121212;
+      text-align: center;
     }
 
     header {
       display: flex;
       align-items: center;
       padding: 15px 30px;
-      background-color: rgba(0, 0, 0, 0.6); /* Transparent black */
+      background-color: rgba(0, 0, 0, 0.6);
       border-bottom: 1px solid #444;
     }
 
@@ -33,20 +35,14 @@
       font-size: 24px;
       font-weight: bold;
     }
-   
-  body {
-      background-color: #121212;
-      color: #eee;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
+
     .player-controls {
       display: flex;
       justify-content: center;
       gap: 15px;
       margin-top: 20px;
     }
+
     .player-controls button {
       background: #1e1e1e;
       border: none;
@@ -56,31 +52,117 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
     .player-controls button:hover {
       background: #333;
     }
+
     input[type="range"] {
       width: 100px;
     }
+
+    #results div {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      cursor: pointer;
+      background: #222;
+      border-radius: 5px;
+      padding: 10px;
+      transition: background 0.3s;
+    }
+
     #results div:hover {
       background: #333;
     }
-  </style>
 
+    #ttiChatDrawerBtn {
+      position: fixed;
+      bottom: 90px;
+      right: 25px;
+      background-color: #00aaff;
+      color: white;
+      font-size: 26px;
+      padding: 14px;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      cursor: pointer;
+      z-index: 9998;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #ttiChatDrawerBtn:hover {
+      background-color: #0077cc;
+      transform: scale(1.1);
+    }
+
+    #ttiChatDrawer {
+      position: fixed;
+      right: -100%;
+      top: 0;
+      width: 400px;
+      max-width: 100%;
+      height: 100%;
+      background: #111;
+      color: white;
+      box-shadow: -4px 0 12px rgba(0,0,0,0.5);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.3s ease-in-out;
+    }
+
+    #ttiChatDrawer.open {
+      right: 0;
+    }
+
+    #ttiChatDrawer iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+    }
+
+    #ttiChatHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background-color: #222;
+      font-size: 18px;
+      border-bottom: 1px solid #333;
+    }
+
+    #ttiChatHeader button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 500px) {
+      #ttiChatDrawer {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
-  </head>
 <body>
 
+  <!-- Header -->
   <header>
-    <img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Ffreebiesupply.com%2Flogos%2Fyoutube-icon-logo%2F&psig=AOvVaw1nwYG9fsy5Vpqv36ohqkay&ust=1752156201397000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCNj51dj4r44DFQAAAAAdAAAAABAE" alt="Logo" class="logo" />
+    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Music_Logo_2019.svg" alt="YouTube Music Logo" class="logo" />
     <div class="site-title">YouTube Music Queue Player</div>
   </header>
 
+  <!-- Search -->
   <input type="text" id="yt-search" placeholder="Search YouTube Music..." style="width: 60%; padding: 10px; border-radius: 5px;" />
   <button onclick="searchYouTube()" style="padding: 10px 15px; background: #00aaff; color: white; border: none; border-radius: 5px;">Search</button>
 
+  <!-- Results -->
   <div id="results" style="max-width: 600px; margin: 20px auto;"></div>
 
+  <!-- Player Controls -->
   <div class="player-controls">
     <button onclick="prevTrack()">⏮️</button>
     <button onclick="togglePlayPause()" id="playPauseBtn">▶️</button>
@@ -88,18 +170,29 @@
     <input type="range" id="volumeControl" min="0" max="100" value="50">
   </div>
 
+  <!-- Queue -->
   <h3>Queue</h3>
   <ul id="queue" style="list-style: none; padding: 0;"></ul>
 
+  <!-- YouTube Player (Hidden) -->
   <div id="youtube-player" style="width: 0; height: 0;"></div>
 
+  <!-- Chat Drawer Trigger -->
+  <div id="ttiChatDrawerBtn" title="Open Music Player">PUBLIC CHAT</div>
+
+  <!-- Chat Drawer -->
+  <div id="ttiChatDrawer">
+    <div id="ttiChatHeader">
+      <span>CHATROOM</span>
+      <button onclick="closettiChatDrawer()">✖</button>
+    </div>
+    <iframe src="chat.html" allow="autoplay; encrypted-media; fullscreen; accelerometer; gyroscope; clipboard-write; web-share"></iframe>
+  </div>
+
+  <!-- YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
-    let player;
-    let playerReady = false;
-    let queue = [];
-    let currentIndex = -1;
-    let isPlaying = false;
+    let player, playerReady = false, queue = [], currentIndex = -1, isPlaying = false;
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('youtube-player', {
@@ -111,7 +204,7 @@
             playerReady = true;
             setVolume(50);
           },
-          onStateChange: (event) => {
+          onStateChange: event => {
             if (event.data === YT.PlayerState.ENDED) nextTrack();
           }
         }
@@ -123,7 +216,7 @@
       const resultsDiv = document.getElementById('results');
       resultsDiv.innerHTML = 'Searching...';
 
-      fetch(`/api/youtube?query=${encodeURIComponent(query)}`)
+      fetch(`/api/youtube?query=${encodeURIComponent(query)}`) // Replace this with your real API endpoint
         .then(res => res.json())
         .then(data => {
           resultsDiv.innerHTML = '';
@@ -133,27 +226,15 @@
             const thumbnail = item.snippet.thumbnails.default.url;
 
             const div = document.createElement('div');
-            div.style.display = 'flex';
-            div.style.alignItems = 'center';
-            div.style.marginBottom = '10px';
-            div.style.cursor = 'pointer';
-            div.style.background = '#222';
-            div.style.borderRadius = '5px';
-            div.style.padding = '10px';
-
             div.innerHTML = `
               <img src="${thumbnail}" alt="${title}" style="margin-right: 10px; border-radius: 4px;">
               <div>${title}</div>
             `;
-
             div.onclick = () => addToQueue({ title, videoId });
             resultsDiv.appendChild(div);
           });
         })
-        .catch(err => {
-          console.error(err);
-          resultsDiv.innerHTML = 'Error fetching results.';
-        });
+        .catch(() => resultsDiv.innerHTML = 'Error fetching results.');
     }
 
     function addToQueue(song) {
@@ -233,112 +314,15 @@
         queueList.appendChild(li);
       });
     }
-  </script>
-  <script>
-  function acceptConsent() {
-    localStorage.setItem("consentAccepted", "yes");
-    document.getElementById("consentModalBackdrop").style.display = "none";
-  }
 
-  // Show the modal only if user hasn't accepted yet
-  window.addEventListener("load", () => {
-    if (localStorage.getItem("consentAccepted") !== "yes") {
-      document.getElementById("consentModalBackdrop").style.display = "flex";
-    } else {
-      document.getElementById("consentModalBackdrop").style.display = "none";
+    // Chat drawer
+    const ttiChatDrawer = document.getElementById('ttiChatDrawer');
+    document.getElementById('ttiChatDrawerBtn').onclick = function () {
+      ttiChatDrawer.classList.add('open');
+    };
+    function closettiChatDrawer() {
+      ttiChatDrawer.classList.remove('open');
     }
-  });
-</script>
- 
-
- <div id="ttiChatDrawerBtn" title="Open Music Player">PUBLIC CHAT</div>
-
-    <div id="ttiChatDrawer">
-      <div id="ttiChatHeader">
-        <span>CHATROOM</span>
-        <button onclick="closettiChatDrawer()">✖</button>
-      </div>
-      <iframe 
-        src="chat.html" 
-        frameborder="0"
-        allow="autoplay; encrypted-media; fullscreen; accelerometer; gyroscope; clipboard-write; web-share"
-        allowfullscreen>
-      </iframe>
-    </div>
-
-    <style>
-      #ttiChatDrawerBtn {
-        position: fixed;
-        bottom: 90px;
-        right: 25px;
-        background-color: #00aaff;
-        color: white;
-        font-size: 26px;
-        padding: 14px;
-        border-radius: 50%;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        cursor: pointer;
-        z-index: 9998;
-        transition: background-color 0.3s, transform 0.2s;
-      }
-      #ttiChatDrawerBtn:hover {
-        background-color: #0077cc;
-        transform: scale(1.1);
-      }
-      #ttiChatDrawer {
-        position: fixed;
-        right: -100%;
-        top: 0;
-        width: 400px;
-        max-width: 100%;
-        height: 100%;
-        background: #111;
-        color: white;
-        box-shadow: -4px 0 12px rgba(0,0,0,0.5);
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        transition: right 0.3s ease-in-out;
-      }
-      #ttiChatDrawer.open {
-        right: 0;
-      }
-      #ttiChatDrawer iframe {
-        flex: 1;
-        width: 100%;
-        border: none;
-      }
-      #ttiChatHeader {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 16px;
-        background-color: #222;
-        font-size: 18px;
-        border-bottom: 1px solid #333;
-      }
-      #ttiChatHeader button {
-        background: transparent;
-        border: none;
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-      }
-      @media (max-width: 500px) {
-        #ttiChatDrawer {
-          width: 100%;
-        }
-      }
-    </style>
-
-    <script>
-      const ttiChatDrawer = document.getElementById('ttiChatDrawer');
-      document.getElementById('ttiChatDrawerBtn').onclick = function () {
-        ttiChatDrawer.classList.add('open');
-      };
-      function closettiChatDrawer() {
-        ttiChatDrawer.classList.remove('open');
-      }
-    </script>
- </body>
+  </script>
+</body>
 </html>
