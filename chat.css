@@ -1,16 +1,16 @@
 
 
-    .chatbox-container {
-      background: #111;
-      width: 90%;
-      max-width: 800px;
-      margin: 30px auto;
-      padding: 15px;
-      border-radius: 12px;
-      background: #1b1b1b;
-      color: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
+.chatbox-container {
+  background-image: url('https://tmoybahaw.github.io/ttichat/uwp4822602.png');
+  width: 90%;
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 15px;
+  border-radius: 12px;
+  background-color: #1b1b1b; /* Changed from 'background' to 'background-color' */
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
 
     .chatbox-container h5 {
       text-align: center;
