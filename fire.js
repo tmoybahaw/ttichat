@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const firebaseConfig = {
-    apiKey: "AIzaSyDSQa4jx8Wg790zaRK2sN4zfTL76g6npzI",
-    authDomain: "ttichat-663ef.firebaseapp.com",
-    projectId: "ttichat-663ef",
-    storageBucket: "ttichat-663ef.firebasestorage.app",
-    messagingSenderId: "191798921128",
-    appId: "1:191798921128:web:8542da451c48a6f4a27f9d",
-    measurementId: "G-R6GW38SM1H"
+   const firebaseConfig = {
+    apiKey: "AIzaSyCCD_QsMrIw-EVscSwSqm0-ygFhuW1o8Q8",
+    authDomain: "chat-b1c07.firebaseapp.com",
+    projectId: "chat-b1c07",
+    storageBucket: "chat-b1c07.firebasestorage.app",
+    messagingSenderId: "15222959483",
+    appId: "1:15222959483:web:315a0d26ebd14a6874a1de",
+    measurementId: "G-M4VL4VKX04"
   };
 
   firebase.initializeApp(firebaseConfig);
